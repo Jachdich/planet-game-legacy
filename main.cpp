@@ -169,7 +169,7 @@ public:
             int dy = y - stars[i].y;
             if (dx * dx + dy * dy < stars[i].radius * stars[i].radius) {
                 this->stars[i].select();
-                printf("aaaaaaaaaaaaaaaaaaaaa %d\n", this);
+                //printf("aaaaaaaaaaaaaaaaaaaaa %d\n", this);
                 return &this->stars[i];
             }
         }
@@ -211,13 +211,13 @@ public:
         }
         bool needToGenerate = false;
         if (cache.size() <= y) {
-            printf("Resizing y when y=%d and size=%d\n", y, cache.size());
+            //printf("Resizing y when y=%d and size=%d\n", y, cache.size());
             cache.resize(y + 1);
             cache[y] = std::vector<Sector>();
             needToGenerate = true;
         }
         if (cache[y].size() <= x) {
-            printf("Resizing x when x=%d and size=%d\n", x, cache[y].size());
+            //printf("Resizing x when x=%d and size=%d\n", x, cache[y].size());
             cache[y].resize(x + 1);
             needToGenerate = true;
         }
@@ -240,9 +240,9 @@ public:
     }
 };
 
-class Example : public olc::PixelGameEngine {
+class Game : public olc::PixelGameEngine {
 public:
-	Example() {
+	Game() {
 		sAppName = "Example";
 	}
 
@@ -281,7 +281,6 @@ public:
                 Star * st = s.getStarAt(GetMouseX() - translateX, GetMouseY() - translateY);
                 if (st != NULL) {
                     st->select();
-                    printf("Star at x,y %d %d\n", st->x, st->y);
                 }
             }
         }
@@ -307,8 +306,8 @@ int main() {
     srand((unsigned)time(NULL));
     nProcGen = rand();
     noiseGen.SetNoiseType(FastNoise::Simplex);
-	Example demo;
-	if (demo.Construct(256, 256, 2, 2))
-		demo.Start();
+	Game app;
+	if (app.Construct(256, 256, 2, 2))
+		app.Start();
 	return 0;
 }
