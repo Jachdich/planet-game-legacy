@@ -137,9 +137,7 @@ public:
     }
     
     void draw(olc::PixelGameEngine * e, float translateX, float translateY) {
-        printf("%u\n", this);
         if (this->selected) {
-            //printf("selected\n");
             e->FillCircle(this->x + translateX, this->y + translateY, this->radius, this->colour);
         } else {
             e->DrawCircle(this->x + translateX, this->y + translateY, this->radius, this->colour);
@@ -148,7 +146,6 @@ public:
     
     void select() {
         this->selected = true;
-        //printf("call to select %u\n", this);
     }
 };
 
@@ -168,8 +165,7 @@ public:
             int dx = x - stars[i].x;
             int dy = y - stars[i].y;
             if (dx * dx + dy * dy < stars[i].radius * stars[i].radius) {
-                this->stars[i].select();
-                //printf("aaaaaaaaaaaaaaaaaaaaa %d\n", this);
+                //this->stars[i].select();
                 return &this->stars[i];
             }
         }
@@ -177,7 +173,7 @@ public:
     }
     
     void generate() {
-        this->numStars = 1;//rand() % 8 + 2;
+        this->numStars = rand() % 8 + 2;
         this->stars = std::vector<Star>(numStars);
         for (int i = 0; i < this->numStars; i++) {
             this->stars[i] = Star(rand() % this->r + this->x, rand() % this->r + this->y);
@@ -189,7 +185,6 @@ public:
     }
     
     void draw(olc::PixelGameEngine * e, float translateX, float translateY) {
-        printf("%d\n", this);
         e->DrawRect(this->x * this->r + translateX, this->y * this->r + translateY, r, r, olc::Pixel(255, 255, 255));
         for (int i = 0; i < this->numStars; i++) {
             this->stars[i].draw(e, translateX + this->x * this->r, translateY + this->y * this->r);
@@ -205,19 +200,17 @@ public:
         this->cache = std::vector<std::vector<Sector>>(0);
     }
     
-    Sector& getSectorAt(int x, int y) {
+    Sector * getSectorAt(int x, int y) {
         if (x < 0 || y < 0) {
-            return this->cache[0][0];
+            return &this->cache[0][0];
         }
         bool needToGenerate = false;
         if (cache.size() <= y) {
-            //printf("Resizing y when y=%d and size=%d\n", y, cache.size());
             cache.resize(y + 1);
             cache[y] = std::vector<Sector>();
             needToGenerate = true;
         }
         if (cache[y].size() <= x) {
-            //printf("Resizing x when x=%d and size=%d\n", x, cache[y].size());
             cache[y].resize(x + 1);
             needToGenerate = true;
         }
@@ -227,13 +220,13 @@ public:
 
             cache[y][x] = a;
         }
-        return this->cache[y][x];
+        return &this->cache[y][x];
     }
     
     void draw(olc::PixelGameEngine * e, float translateX, float translateY) {
         int sectorX = -translateX / 256;
         int sectorY = -translateY / 256;
-        getSectorAt(sectorX, sectorY).draw(e, translateX, translateY);
+        getSectorAt(sectorX, sectorY)->draw(e, translateX, translateY);
         //getSectorAt(sectorX + 1, sectorY).draw(e, translateX, translateY);
         //getSectorAt(sectorX, sectorY + 1).draw(e, translateX, translateY);
         //getSectorAt(sectorX + 1, sectorY + 1).draw(e, translateX, translateY);
@@ -255,16 +248,12 @@ public:
     bool galaxyView = true;
     bool planetView = false;
     bool starView = false;
-    //float totalElapsedTime = 0;
 
 	bool OnUserCreate() override {
 		return true;
 	}
 
 	bool OnUserUpdate(float fElapsedTime) override {
-        //totalElapsedTime += fElapsedTime;
-        //if (totalElapsedTime <= 0.1f) return true;
-        //totalElapsedTime = 0;
         
 		Clear(olc::BLACK);
         if (galaxyView) {
@@ -277,8 +266,8 @@ public:
         
         if (GetMouse(0).bPressed) {
             if (galaxyView) {
-                Sector s = map.getSectorAt((GetMouseX() - translateX) / 256, (GetMouseY() - translateY) / 256);
-                Star * st = s.getStarAt(GetMouseX() - translateX, GetMouseY() - translateY);
+                Sector * s = map.getSectorAt((GetMouseX() - translateX) / 256, (GetMouseY() - translateY) / 256);
+                Star * st = s->getStarAt(GetMouseX() - translateX, GetMouseY() - translateY);
                 if (st != NULL) {
                     st->select();
                 }
@@ -286,17 +275,17 @@ public:
         }
         
         if (GetMouse(1).bPressed) {
-            //lastMouseX = GetMouseX();
-            //lastMouseY = GetMouseY();
+            lastMouseX = GetMouseX();
+            lastMouseY = GetMouseY();
         }
         
         if (GetMouse(1).bHeld) {
-            //int offX = GetMouseX() - lastMouseX;
-            //int offY = GetMouseY() - lastMouseY;
-            //translateX += offX;
-            //translateY += offY;
-            //lastMouseX = GetMouseX();
-            //lastMouseY = GetMouseY();
+            int offX = GetMouseX() - lastMouseX;
+            int offY = GetMouseY() - lastMouseY;
+            translateX += offX;
+            translateY += offY;
+            lastMouseX = GetMouseX();
+            lastMouseY = GetMouseY();
         }
         return true;
     }
