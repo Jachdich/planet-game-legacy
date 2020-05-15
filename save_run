@@ -1,0 +1,2 @@
+cp a.out Builds/build_$(date +%d-%m-%Y_%H:%M:%S).x86_64
+./a.out

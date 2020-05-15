@@ -47,7 +47,6 @@ public:
     olc::Pixel baseColour;
     float posFromStar;
     double theta;
-    float angularVelocity;
 
     Planet() {}
     Planet(int posFromStar) {
@@ -68,7 +67,6 @@ public:
             this->generationNoise[i]   = (rand() % 900 + 100) / 1000.0;
         }
         this->baseColour = rndPixel(80, 255);
-        this->angularVelocity = (rand() % 100 + 10) / 50.0;
     }
 
     void draw(olc::PixelGameEngine * e, float x, float y) {
@@ -86,7 +84,7 @@ public:
                 int b = 0;
                 int total = 0;
                 for (int i = 0; i < this->numColours; i++) {
-                    if ((noiseGen.GetNoise(xb / this->generationNoise[i], yb / this->generationNoise[i], this->generationZValues[i]) + 1) / 2 > this->generationChances[i]) {
+                    if ((noiseGen.GetNoise(xc / this->generationNoise[i], yc / this->generationNoise[i], this->generationZValues[i]) + 1) / 2 > this->generationChances[i]) {
                         r += this->generationColours[i].r;
                         g += this->generationColours[i].g;
                         b += this->generationColours[i].b;
@@ -152,10 +150,9 @@ public:
         e->FillCircle(ax, ay, this->radius, this->colour);
     }
 
-    void drawWithPlanets(olc::PixelGameEngine * e, float fElapsedTime) {
+    void drawWithPlanets(olc::PixelGameEngine * e) {
         e->FillCircle(WIDTH / 2, HEIGHT / 2, this->radius * 6, this->colour);
         for (Planet & p: this->planets) {
-            p.theta += p.angularVelocity * fElapsedTime;
             float ax = p.posFromStar * cos(p.theta);
             float ay = p.posFromStar * sin(p.theta);
             e->DrawCircle(WIDTH / 2, HEIGHT / 2, p.posFromStar, olc::Pixel(60, 60, 60, 200));
@@ -171,7 +168,6 @@ public:
 class Sector {
 public:
     int x, y, r, numStars;
-    bool generated = false;
     std::vector<Star> stars;
     Sector() {}
     Sector(int sx, int sy, int sr) {
@@ -197,7 +193,6 @@ public:
         for (int i = 0; i < this->numStars; i++) {
             this->stars[i] = Star(rand() % this->r + this->x, rand() % this->r + this->y);
         }
-        generated = true;
     }
 
     void load(std::string filename) {
@@ -234,7 +229,7 @@ public:
             cache[y].resize(x + 1);
             needToGenerate = true;
         }
-        if (needToGenerate || !this->cache[y][x].generated) {
+        if (needToGenerate) {
             Sector a(x, y, 256);
             a.generate();
 
@@ -249,7 +244,7 @@ public:
         float num = ceil(WIDTH / 256.0);
         for (int x = 0; x < num + 1; x++) {
             for (int y = 0; y < num + 1; y++) {
-                //std::cout << x << " " << y << "\n";
+                std::cout << (&getSectorAt(sectorX + x, sectorY + y) == &getSectorAt(0, 0));
                 getSectorAt(sectorX + x, sectorY + y)->draw(e, translateX, translateY);
             }
         }
@@ -287,7 +282,7 @@ public:
         if (galaxyView) {
             map.draw(this, this->translateX, this->translateY);
         } else if (starView) {
-            selectedStar->drawWithPlanets(this, fElapsedTime);
+            selectedStar->drawWithPlanets(this);
         } else if (planetView) {
 
         }
@@ -320,10 +315,6 @@ public:
             translateY += offY;
             lastMouseX = GetMouseX();
             lastMouseY = GetMouseY();
-        }
-        
-        if (GetKey(olc::Key::L).bPressed) {
-            std::cout << "L pressed\n";
         }
 
         if (GetKey(olc::Key::ESCAPE).bPressed) {
