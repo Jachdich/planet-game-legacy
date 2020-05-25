@@ -1,1 +1,0 @@
-g++ main.cpp FastNoise.cpp -O3 -lX11 -lGL -lpthread -lpng -lstdc++fs -g && ./save_run 
