@@ -1,9 +1,10 @@
-run: client server
-	./server &
-	./client
+SOURCES = server.cpp generation.cpp logging.cpp planet.cpp sector.cpp star.cpp sectormap.cpp
 
-client:
-	g++ client.cpp FastNoise.cpp -Wall -g -o $@ -Bstatic -lX11 -lGL -lpthread -lpng -lstdc++fs -ljsoncpp
+server: $(SOURCES)
+	g++ $(SOURCES) -lpthread -ljsoncpp -g -Wall -o $@
 
-server:
-	g++ server.cpp -lpthread -ljsoncpp -g -Wall -o $@
+run: server
+	./server
+
+debug: server
+	gdb server

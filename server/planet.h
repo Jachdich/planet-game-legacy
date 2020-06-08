@@ -1,7 +1,7 @@
 #ifndef __PLANET_H
 #define __PLANET_H
+#include "generation.h"
 #include <jsoncpp/json/json.h>
-#include "olcPixelGameEngine.h"
 
 class Planet {
 public:
@@ -9,17 +9,16 @@ public:
     int radius;
     int numColours;
     std::vector<double> generationChances;
-    std::vector<olc::Pixel> generationColours;
+    std::vector<Pixel> generationColours;
     std::vector<int> generationZValues;
     std::vector<double> generationNoise;
-    olc::Pixel baseColour;
+    Pixel baseColour;
     int posFromStar;
     double theta;
     double angularVelocity;
-    
-    Planet();
-    Planet(Json::Value res);
-    void draw(olc::PixelGameEngine * e, float x, float y);
-};
 
+    Planet();
+    Planet(int posFromStar);
+    Json::Value asJson();
+};
 #endif
