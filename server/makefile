@@ -8,3 +8,6 @@ run: server
 
 debug: server
 	gdb server
+
+clean:
+	rm -rf *.o server
