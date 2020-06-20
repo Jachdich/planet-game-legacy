@@ -9,6 +9,7 @@ void handleNetwork(tcp::socket * sock, SectorCache * cache) {
         std::unique_lock<std::mutex> lk(netq_mutex);
         netq.wait(lk);
         lk.unlock();
+        if (netThreadStop) { return; }
         Json::Value totalJSON;
         int numRequests = netRequests.size();
         std::unique_lock<std::mutex> lock(netq_mutex);
@@ -16,7 +17,7 @@ void handleNetwork(tcp::socket * sock, SectorCache * cache) {
             Json::Value n = netRequests.back();
             netRequests.pop_back();
             totalJSON["requests"].append(n);
-            std::cout << "Net thread got request " << n << "\n";
+            //std::cout << "Net thread got request " << n << "\n";
         }
         lock.unlock();
         
@@ -27,7 +28,7 @@ void handleNetwork(tcp::socket * sock, SectorCache * cache) {
         const std::string output = Json::writeString(builder, totalJSON);
         
         asio::write(*sock, asio::buffer(output + "\n"), error);
-        size_t len = asio::read_until(*sock, buf, "\n");
+        /*size_t len = */asio::read_until(*sock, buf, "\n");
         std::istream is(&buf);
         std::string line;
         std::getline(is, line);

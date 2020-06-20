@@ -1,6 +1,8 @@
 #include "sector.h"
 #include "star.h"
+#include "client.h"
 #include "olcPixelGameEngine.h"
+#include "helperfunctions.h"
 
 Sector::Sector() {}
 
@@ -32,9 +34,9 @@ Star * Sector::getStarAt(int x, int y) {
     return nullptr;
 }
 
-void Sector::draw(olc::PixelGameEngine * e, float translateX, float translateY) {
-    e->DrawRect(this->x * this->r + translateX, this->y * this->r + translateY, r, r, olc::Pixel(255, 255, 255));
+void Sector::draw(olc::PixelGameEngine * e, CamParams trx) {
+    //e->DrawRect(this->x * this->r * trx.zoom + trx.tx, this->y * this->r * trx.zoom + trx.ty, r * trx.zoom, r * trx.zoom, olc::Pixel(255, 255, 255));
     for (int i = 0; i < this->numStars; i++) {
-        this->stars[i].draw(e, translateX + this->x * this->r, translateY + this->y * this->r);
+        this->stars[i].draw(e, trx, x * r, y * r);
     }
 }

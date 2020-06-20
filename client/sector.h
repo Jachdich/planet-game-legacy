@@ -2,6 +2,7 @@
 #define __SECTOR_H
 #include "star.h"
 #include "olcPixelGameEngine.h"
+#include "helperfunctions.h"
 #include <jsoncpp/json/json.h>
 
 class Sector {
@@ -15,6 +16,6 @@ public:
     void setRequested();
     Sector(Json::Value root);
     Star * getStarAt(int x, int y);
-    void draw(olc::PixelGameEngine * e, float translateX, float translateY);
+    void draw(olc::PixelGameEngine * e, CamParams trx);
 };
 #endif

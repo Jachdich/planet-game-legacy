@@ -14,12 +14,14 @@ public:
     float y = 0;
     int num = 0;
     bool selected;
+    int randomDissapearChance;
     
     Star();
     Star(Json::Value root);
     
-    void drawWithPlanets(olc::PixelGameEngine * e, float fElapsedTime, float translateX, float translateY);
-    void draw(olc::PixelGameEngine * e, float translateX, float translateY);
+    void drawWithPlanets(olc::PixelGameEngine * e, float fElapsedTime, CamParams trx);
+    void draw(olc::PixelGameEngine * e, CamParams trx, int secOffsetX, int secOffsetY);
     void select();
+    Planet * getPlanetAt(int x, int y, CamParams trx);
 };
 #endif

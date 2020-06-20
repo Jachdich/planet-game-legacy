@@ -1,4 +1,4 @@
-SOURCES = client.cpp FastNoise.cpp planet.cpp star.cpp sector.cpp sectorcache.cpp game.cpp network.cpp
+SOURCES = client.cpp FastNoise.cpp planet.cpp star.cpp sector.cpp sectorcache.cpp game.cpp network.cpp planetsurface.cpp sprites.cpp helperfunctions.cpp
 HEADERS = $(SOURCES:.cpp=.h)
 OBJECTS = $(SOURCES:.cpp=.o)
 
@@ -6,10 +6,17 @@ client: $(OBJECTS)
 	g++ $(OBJECTS) -o $@ -lX11 -lGL -lpthread -lpng -lstdc++fs -ljsoncpp
 
 %.o: %.cpp $(HEADERS)
-	g++ -c -o $@ $< -Wall -g
+	g++ -c -o $@ $< -Wall -g -O3 -std=c++17
+
+FastNoise.o: FastNoise.cpp
+	g++ -c -o $@ $< -Wall -g -O3
 
 debug: client
 	gdb client
 
 run: client
 	./client
+
+clean:
+	rm *.o
+	rm client

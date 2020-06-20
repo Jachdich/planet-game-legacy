@@ -5,7 +5,7 @@
 
 Star::Star() {}
 
-Star::Star(float x, float y) {
+Star::Star(int x, int y) {
     this->x = x;
     this->y = y;
 
@@ -13,7 +13,7 @@ Star::Star(float x, float y) {
     this->radius = rand() % 7 + 5;
     this->colour = Pixel(rand() % 100 + 155, rand() % 100 + 155, rand() % 100 + 155);
 
-    this->planets = std::vector<Planet>(this->num);
+    this->planets = new Planet[this->num];
     for (int i = 0; i < this->num; i++) {
         this->planets[i] = Planet(rand() % 200 + this->radius * 6 + 20);
     }
@@ -26,7 +26,7 @@ Json::Value Star::asJson() {
     res["num"] = num;
     res["colour"] = colour.asInt();
     res["radius"] = radius;
-    for (int i = 0; i < (signed)planets.size(); i++) {
+    for (int i = 0; i < this->num; i++) {
         res["planets"].append(planets[i].asJson());
     }
     return res;

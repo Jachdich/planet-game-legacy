@@ -1,7 +1,7 @@
 #include "olcPixelGameEngine.h"
 #include "planet.h"
 #include "client.h"
-
+#include "helperfunctions.h"
 
 Planet::Planet() {}
 Planet::Planet(Json::Value res) {
@@ -28,9 +28,11 @@ Planet::Planet(Json::Value res) {
         generationNoise[i]   = res["generationNoise"][i].asDouble();
     }
     
+    surface = PlanetSurface();
+    
 }
 
-void Planet::draw(olc::PixelGameEngine * e, float x, float y) {
+void Planet::draw(olc::PixelGameEngine * e, double x, double y, CamParams trx) {
     for (int ya = 0; ya < this->radius * 2; ya++) {
         for (int xa = 0; xa < this->radius * 2; xa++) {
             int xb = xa - this->radius;
@@ -61,7 +63,11 @@ void Planet::draw(olc::PixelGameEngine * e, float x, float y) {
                 g /= total;
                 b /= total;
             }
-            e->Draw(xc, yc, olc::Pixel(r, g, b));
+            e->Draw(xc * trx.zoom + trx.tx, yc * trx.zoom + trx.ty, olc::Pixel(r, g, b));
         }
     }
+}
+
+void Planet::drawSurface(olc::PixelGameEngine * e, CamParams trx) {
+    surface.draw(e, trx, this);
 }

@@ -2,3 +2,4 @@ Builds
 *.old
 asio
 test*
+/Debug/

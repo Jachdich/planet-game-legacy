@@ -3,25 +3,22 @@
 
 #include "olcPixelGameEngine.h"
 #include "sector.h"
+#include "helperfunctions.h"
 #include <asio.hpp>
+#include <unordered_map>
+
 using asio::ip::tcp;
 
 class SectorCache {
 public:
-    int x = 0;
-    int y = 0;
     int secNum = 6;
-    std::vector<Sector> secs;
+    std::unordered_map<long long, Sector> secs;
     tcp::socket * sock;
     
     SectorCache(tcp::socket * sock);
     void getSectorFromNetwork(int x, int y);
     void setSectorAt(int sx, int sy, Sector s);
-    void shiftLeft();
-    void shiftRight();
-    void shiftUp();
-    void shiftDown();
-    Sector * getSectorAt(int sx, int sy);
-    void draw(olc::PixelGameEngine * e, float translateX, float translateY);
+    Sector * getSectorAt(int x, int y);
+    void draw(olc::PixelGameEngine * e, CamParams trx);
 };
 #endif

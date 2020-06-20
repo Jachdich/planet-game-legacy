@@ -7,6 +7,8 @@
 #include "game.h"
 #include "client.h"
 #include "network.h"
+#include "sprites.h"
+#include "helperfunctions.h"
 
 Game::Game(int argc, char ** argv) : io_context(), sock(io_context), map(&sock) {
     sAppName = "Example";
@@ -31,37 +33,59 @@ bool Game::OnUserCreate() {
     
     asio::connect(sock, endpoints);
     
-    std::thread(handleNetwork, &sock, &map).detach();        
+    std::thread(handleNetwork, &sock, &map).detach();
+    
+    loadSprites();
+      
     return true;
 }
 
 bool Game::OnUserUpdate(float fElapsedTime) {
+    //if (planetView) {
+    //    Clear(selectedPlanet->baseColour);
+    //} else {
+        Clear(olc::BLACK);
+    //}
 
-    Clear(olc::BLACK);
     if (galaxyView) {
-        map.draw(this, this->translateX, this->translateY);
+        map.draw(this, trx);
     } else if (starView) {
-        selectedStar->drawWithPlanets(this, fElapsedTime, translateX, translateY);
+        selectedStar->drawWithPlanets(this, fElapsedTime, trx);
     } else if (planetView) {
-
+        selectedPlanet->drawSurface(this, trx);
+    }
+    
+    int count = GetMouseWheel();
+    if (count != 0) {
+        zoom(-count);
     }
 
     if (GetMouse(0).bPressed) {
-            Sector * s = map.getSectorAt(floor((GetMouseX() - translateX) / 256), floor((GetMouseY() - translateY) / 256));
+        if (galaxyView) {
+            Sector * s = map.getSectorAt(floor((GetMouseX() - trx.tx) / 256), floor((GetMouseY() - trx.ty) / 256));
             std::cout << s->requested << " " << s->x << " " << s->y << "\n";
             Star * st = s->getStarAt(
-                    GetMouseX() - translateX - floor((GetMouseX() - translateX) / 256) * 256,
-                    GetMouseY() - translateY - floor((GetMouseY() - translateY) / 256) * 256);
+                    (GetMouseX() - trx.tx) / trx.zoom - floor((GetMouseX() - trx.tx) / trx.zoom / 256) * 256,
+                    (GetMouseY() - trx.ty) / trx.zoom - floor((GetMouseY() - trx.ty) / trx.zoom / 256) * 256);
             if (st != nullptr) {
                 this->selectedStar = st;
                 this->starView = true;
                 this->galaxyView = false;
-                galaxyTranslateX = translateX;
-                galaxyTranslateY = translateY;
-                translateX = 0;
-                translateY = 0;
+                galaxyTrx = trx;
+                trx = {0, 0, 1};
             }
-
+        }
+        
+        if (starView) {
+            Planet * p = selectedStar->getPlanetAt(GetMouseX(), GetMouseY(), trx);
+            if (p != nullptr) {
+                this->selectedPlanet = p;
+                galaxyView = false;
+                starView = false;
+                planetView = true;
+                trx = {0, 0, 1};
+            }
+        }
     }
 
     if (GetMouse(1).bPressed) {
@@ -72,8 +96,8 @@ bool Game::OnUserUpdate(float fElapsedTime) {
     if (GetMouse(1).bHeld) {
         int offX = GetMouseX() - lastMouseX;
         int offY = GetMouseY() - lastMouseY;
-        translateX += offX;
-        translateY += offY;
+        trx.tx += offX;
+        trx.ty += offY;
         lastMouseX = GetMouseX();
         lastMouseY = GetMouseY();
     }
@@ -83,11 +107,15 @@ bool Game::OnUserUpdate(float fElapsedTime) {
     }
 
     if (GetKey(olc::Key::ESCAPE).bPressed) {
-        if (starView) {
+        if (planetView) {
+            starView = true;
+            planetView = false;
+            galaxyView = false;
+            trx = {0, 0, 1};
+        } else if (starView) {
             starView = false;
             galaxyView = true;
-            translateX = galaxyTranslateX;
-            translateY = galaxyTranslateY;
+            trx = galaxyTrx;
             this->selectedStar = nullptr;
         } else if (galaxyView) {
             return false;
@@ -98,6 +126,19 @@ bool Game::OnUserUpdate(float fElapsedTime) {
         std::lock_guard<std::mutex> lock(netq_mutex);
         netq.notify_all();
     }
+    
+    DrawString(0, 0, std::to_string(map.secs.size()), olc::Pixel(255, 255, 255));
 
     return true;
+}
+
+void Game::zoom(int count) {
+    trx.tx -= GetMouseX();
+    trx.ty -= GetMouseY();
+    double delta = count < 0 ? 1.05 : count > 0 ? 1.0/1.05 : 1.0;
+    trx.zoom *= delta;
+    trx.tx *= delta;
+    trx.ty *= delta;
+    trx.tx += GetMouseX();
+    trx.ty += GetMouseY();
 }

@@ -36,26 +36,10 @@ std::mutex cache_mutex;
 std::mutex netq_mutex;
 std::condition_variable netq;
 std::vector<Json::Value> netRequests;
+bool netThreadStop = false;
 
 int WIDTH = 960;
 int HEIGHT = 540;
-
-Json::Value makeJSON(std::string x) {
-    Json::CharReaderBuilder builder;
-    Json::CharReader* reader = builder.newCharReader();
-
-    Json::Value root;
-    std::string errors;
-
-    bool parsingSuccessful = reader->parse(
-        x.c_str(),
-        x.c_str() + x.size(),
-        &root,
-        &errors
-    );
-    delete reader;
-    return root;
-}
 
 int main(int argc, char ** argv) {
     noiseGen.SetNoiseType(FastNoise::Simplex);
@@ -63,6 +47,8 @@ int main(int argc, char ** argv) {
 	if (app.Construct(WIDTH, HEIGHT, 2, 2))
 		app.Start();
     app.destruct();
+    netThreadStop = true;
+    netq.notify_all();
 	return 0;
 }
     

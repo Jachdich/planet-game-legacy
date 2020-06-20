@@ -5,15 +5,15 @@
 #include <jsoncpp/json/json.h>
 class Star {
 public:
-    double radius;
+    int radius;
     Pixel colour;
-    std::vector<Planet> planets;
-    float x = 0;
-    float y = 0;
-    int num = 0;
+    Planet * planets;
+    int x = 0;
+    int y = 0;
 
+    int num = 0;
     Star();
-    Star(float x, float y);
+    Star(int x, int y);
     Json::Value asJson();
     
 };

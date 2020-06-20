@@ -1,18 +1,21 @@
 #include "planet.h"
 #include "generation.h"
+#include "planetsurface.h"
 #include <jsoncpp/json/json.h>
 
 Planet::Planet() {}
+
 Planet::Planet(int posFromStar) {
+	this->mass = 0;
     this->theta = (rndInt(0, 360) / 180.0) * 3.14159265358979323;
     this->posFromStar = posFromStar;
     this->radius = rndInt(genConf["p_radMin"].asInt(), genConf["p_radMax"].asInt());
     this->numColours = (this->radius - 5) / (genConf["p_radMax"].asInt() - 5.0) * 3;
 
-    this->generationChances = std::vector<double>(this->numColours);
-    this->generationColours = std::vector<Pixel>(this->numColours);
-    this->generationZValues = std::vector<int>(this->numColours);
-    this->generationNoise   = std::vector<double>(this->numColours);
+    this->generationChances = new double[this->numColours];
+    this->generationColours = new Pixel[this->numColours];
+    this->generationZValues = new int[this->numColours];
+    this->generationNoise   = new double[this->numColours];
 
     for (int i = 0; i < this->numColours; i++) {
         this->generationChances[i] = rndDouble(genConf["p_genChanceMin"].asDouble(), genConf["p_genChanceMax"].asDouble());
@@ -22,6 +25,15 @@ Planet::Planet(int posFromStar) {
     }
     this->baseColour.rand(genConf["p_baseColMin"].asInt() % 256, genConf["p_baseColMax"].asInt() % 256);
     this->angularVelocity = 1.0 / (posFromStar * posFromStar) * genConf["p_angularVelMultiplier"].asDouble();
+    
+    this->surface = new PlanetSurface();
+}
+
+PlanetSurface * Planet::getSurface() {
+    if (!surface->generated) {
+        surface->generate(radius);
+    }
+    return surface;
 }
 
 Json::Value Planet::asJson() {

@@ -2,6 +2,8 @@
 #define __PLANET_H
 #include <jsoncpp/json/json.h>
 #include "olcPixelGameEngine.h"
+#include "planetsurface.h"
+#include "helperfunctions.h"
 
 class Planet {
 public:
@@ -17,9 +19,12 @@ public:
     double theta;
     double angularVelocity;
     
+    PlanetSurface surface;
+    
     Planet();
     Planet(Json::Value res);
-    void draw(olc::PixelGameEngine * e, float x, float y);
+    void draw(olc::PixelGameEngine * e, double x, double y, CamParams trx);
+    void drawSurface(olc::PixelGameEngine * e, CamParams trx);
 };
 
 #endif
